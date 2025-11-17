@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspirasi Siswa Siswi</title>
+    <!-- 1. Memuat Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Memuat ikon (Heroicons) -->
+    <script type(text/javascript) src="https://unpkg.com/heroicons@2.1.3/24/outline/index.js"></script>
+    <style>
+        /* Menggunakan font Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://rsms.me/inter/inter.css');
+        
+        /* Style untuk modal */
+        #summaryModalContent ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        #summaryModalContent li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="w-full p-4 bg-gradient-to-r from-emerald-600 to-green-800 text-white shadow-md">
+        <!-- ... (konten header tetap sama) ... -->
+        <div class="container mx-auto max-w-4xl flex items-center space-x-3">
+            <!-- 
+                PERUBAHAN DI SINI:
+                Logo placeholder SVG telah diganti dengan logo IPB University dari link yang Anda berikan.
+                Class 'h-14' (tinggi) diatur dan 'w-auto' (lebar) otomatis menyesuaikan.
+            -->
+            <a href="https://www.ipb.ac.id/" target="_blank" rel="noopener">
+                <img src="https://www.ipb.ac.id/wp-content/uploads/2023/12/Logo-IPB-University_Vertical-Putih.png" 
+                     alt="IPB University" 
+                     class="h-14 w-auto">
+            </a>
+            
+            <div>
+                <h1 class="text-2xl font-bold">Aspirasi Siswa Siswi</h1>
+                <p class="text-sm text-emerald-100">Suara Siswa Dan Siswi Untuk Kemajuan Bersama</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="container mx-auto max-w-4xl p-4 space-y-6">
+
+        <!-- 1. Form Aspirasi -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Form Aspirasi</h2>
+            <form id="formAspirasi" class="space-y-4">
+                <div>
+                    <label for="namaPelapor" class="block text-sm font-medium text-gray-700">Nama Pelapor</label>
+                    <input type="text" id="namaPelapor" name="namaPelapor" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" placeholder="Masukkan nama Anda (boleh disamarkan)" required>
+                </div>
+                <div>
+                    <label for="wilayah" class="block text-sm font-medium text-gray-700">Wilayah</label>
+                    <input type="text" id="wilayah" name="wilayah" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" placeholder="Contoh: Bogor Barat" required>
+                </div>
+                <div>
+                    <!-- Tombol Gemini baru ditambahkan di sini -->
+                    <div class="flex justify-between items-center mb-1">
+                        <label for="aspirasi" class="block text-sm font-medium text-gray-700">Isi Aspirasi</label>
+                        <button type="button" id="geminiImproveButton" class="text-sm text-emerald-600 hover:text-emerald-800 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                            ✨ Perbaiki & Perjelas
+                        </button>
+                    </div>
+                    <textarea id="aspirasi" name="aspirasi" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" placeholder="isi dengan aspirasi yang ingin di sampaikan" required></textarea>
+                    <p id="geminiImproveLoading" class="hidden text-xs text-gray-500 mt-1">✨ AI sedang memperbaiki tulisan...</p>
+                </div>
+                <div>
+                    <button type="submit" id="submitButton" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200 disabled:opacity-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                        </svg>
+                        Kirim Aspirasi
+                    </button>
+                    <!-- Indikator loading -->
+                    <div id="loadingIndicator" class="hidden text-center mt-2 text-sm text-gray-500">
+                        <p>Mengirim data...</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 2. Data Aspirasi -->
+        <div class="bg-white rounded-lg shadow-lg">
+            <div class="flex flex-col sm:flex-row justify-between items-center p-6 border-b space-y-2 sm:space-y-0">
+                <h2 class="text-xl font-semibold text-gray-800">Data Aspirasi</h2>
+                <!-- Tombol Gemini baru ditambahkan di sini -->
+                <div class="flex space-x-2">
+                    <button id="geminiSummaryButton" class="flex items-center px-3 py-2 border border-emerald-600 rounded-md shadow-sm text-sm font-medium text-emerald-700 bg-white hover:bg-emerald-50 transition-colors duration-200 disabled:opacity-50">
+                        ✨ Rangkum Aspirasiku
+                    </button>
+                    <button id="exportCsvButton" class="flex items-center px-3 py-2 border border-green-600 rounded-md shadow-sm text-sm font-medium text-green-700 bg-white hover:bg-green-50 transition-colors duration-200 disabled:opacity-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                        </svg>
+                        Ekspor CSV
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tempat tabel data -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wilayah</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aspirasi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelData" class="bg-white divide-y divide-gray-200">
+                        <!-- Data akan dimuat di sini oleh JavaScript -->
+                        <tr id="loadingDataRow">
+                            <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                                Memuat data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Rangkuman (Struktur HTML baru) -->
+    <div id="summaryModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 transition-opacity duration-300">
+        <div class="relative top-20 mx-auto p-6 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center pb-3 border-b">
+                <h3 class="text-lg font-medium text-gray-900">✨ Rangkuman Aspirasi Anda</h3>
+                <button id="closeModalButton" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-600 mb-3">Berikut adalah tema utama dari semua aspirasi yang telah Anda masukkan, dianalisis oleh AI:</p>
+                <div id="summaryModalContent" class="text-sm text-gray-800 bg-gray-50 p-4 rounded-md min-h-[100px] max-h-[40vh] overflow-y-auto">
+                    <!-- Konten dari Gemini akan dimuat di sini -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 3. Memuat Firebase SDK -->
+    <script type="module">
+        // Import fungsi-fungsi yang kita butuhkan dari Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // --- PERBAIKAN DI SINI ---
+        // Menghapus '}' ekstra dari baris import di bawah
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            query, 
+            onSnapshot,
+            getDocs,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ---- PENGATURAN GEMINI API ----
+        const GEMINI_API_KEY = ""; // Biarkan kosong, akan di-handle oleh environment
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
+        
+        // ---- PENGATURAN FIREBASE ----
+        
+        // Variabel global ini (diawali __) disediakan oleh lingkungan eksekusi
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db;
+        let auth;
+        let userId;
+        let aspirasiCollectionRef; // Mengganti nama variabel
+
+        // Menampilkan log debug Firebase (opsional, tapi membantu)
+        setLogLevel('Debug');
+
+        // Fungsi utama untuk inisialisasi aplikasi
+        async function initializeAppWithAuth() {
+            try {
+                // Inisialisasi Firebase App
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Autentikasi pengguna
+                if (initialToken) {
+                    await signInWithCustomToken(auth, initialToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                userId = auth.currentUser.uid;
+                console.log("Firebase Terinisialisasi. User ID:", userId);
+
+                // Tentukan referensi koleksi SETELAH auth berhasil (menggunakan path PRIBADI)
+                const privateCollectionPath = `/artifacts/${appId}/users/${userId}/aspirasi`;
+                aspirasiCollectionRef = collection(db, privateCollectionPath);
+                
+                // Mulai mendengarkan data
+                listenToData();
+
+            } catch (error) {
+                console.error("Error saat inisialisasi Firebase:", error);
+                const loadingRow = document.getElementById('loadingDataRow');
+                if (loadingRow) {
+                    loadingRow.innerHTML = `<td colspan="3" class="px-6 py-4 text-center text-red-500">Gagal terhubung ke database.</td>`;
+                }
+            }
+        }
+
+        // ---- FUNGSI HELPER GEMINI API ----
+        
+        /**
+         * Memanggil Gemini API dengan exponential backoff.
+         * @param {string} prompt Teks prompt dari pengguna.
+         * @param {string | null} systemInstruction Instruksi sistem untuk AI.
+         * @param {number} retries Jumlah percobaan ulang.
+         * @param {number} delay Waktu tunda awal.
+         * @returns {Promise<string>} Teks respons dari AI.
+         */
+        async function callGemini(prompt, systemInstruction = null, retries = 3, delay = 1000) {
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined
+            };
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(GEMINI_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("Respon API tidak valid atau kosong.");
+                    }
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} gagal:`, error);
+                    if (i < retries - 1) {
+                        // Tunggu sebelum mencoba lagi (exponential backoff)
+                        await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                    } else {
+                        throw error; // Lempar error setelah percobaan terakhir
+                    }
+                }
+            }
+            throw new Error("Gagal memanggil API setelah beberapa kali percobaan.");
+        }
+
+
+        // ---- MENGIRIM DATA (Create) ----
+        
+        const form = document.getElementById('formAspirasi');
+        const submitButton = document.getElementById('submitButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Mencegah form reload halaman
+
+            if (!db) {
+                console.error("Database tidak terinisialisasi.");
+                return;
+            }
+
+            // Tampilkan loading & nonaktifkan tombol
+            submitButton.disabled = true;
+            loadingIndicator.classList.remove('hidden');
+
+            // Ambil data dari form
+            const nama = form.namaPelapor.value;
+            const wilayah = form.wilayah.value;
+            const aspirasi = form.aspirasi.value;
+
+            try {
+                // Tambahkan dokumen baru ke Firestore
+                const docRef = await addDoc(aspirasiCollectionRef, { // Menggunakan variabel baru
+                    nama: nama,
+                    wilayah: wilayah,
+                    aspirasi: aspirasi,
+                    dibuatPada: new Date() // Tambahkan timestamp
+                });
+                console.log("Dokumen berhasil ditulis dengan ID:", docRef.id);
+                
+                // Kosongkan form
+                form.reset();
+
+            } catch (error) {
+                console.error("Error saat menambahkan dokumen:", error);
+                alert("Terjadi kesalahan saat mengirim data. Silakan coba lagi.");
+            } finally {
+                // Sembunyikan loading & aktifkan tombol kembali
+                submitButton.disabled = false;
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+
+        // ---- MEMBACA DATA (Read) & TAMPILKAN REAL-TIME ----
+
+        const tabelData = document.getElementById('tabelData');
+        const loadingDataRow = document.getElementById('loadingDataRow');
+
+        function listenToData() {
+            if (!aspirasiCollectionRef) return; // Menggunakan variabel baru
+
+            // onSnapshot akan "mendengarkan" perubahan di koleksi
+            // dan otomatis berjalan setiap kali ada data baru/berubah
+            const q = query(aspirasiCollectionRef); // Menggunakan variabel baru
+            
+            onSnapshot(q, (querySnapshot) => {
+                // Kosongkan tabel (kecuali baris loading)
+                tabelData.innerHTML = ''; 
+                
+                if (querySnapshot.empty) {
+                    tabelData.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">Belum ada data aspirasi.</td></tr>`;
+                    return;
+                }
+
+                // Loop untuk setiap dokumen di koleksi
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    // Buat baris tabel baru
+                    const tr = document.createElement('tr');
+                    tr.classList.add('hover:bg-gray-50');
+                    
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${escapeHTML(data.nama)}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-700">${escapeHTML(data.wilayah)}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-700" style="white-space: pre-wrap; word-break: break-word;">${escapeHTML(data.aspirasi)}</div>
+                        </td>
+                    `;
+                    
+                    // Tambahkan baris ke tabel
+                    tabelData.appendChild(tr);
+                });
+                
+            }, (error) => {
+                console.error("Error saat mengambil data (onSnapshot):", error);
+                tabelData.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-red-500">Gagal memuat data.</td></tr>`;
+            });
+        }
+        
+        // ---- EXPORT KE CSV ----
+        
+        const exportButton = document.getElementById('exportCsvButton');
+        
+        exportButton.addEventListener('click', async () => {
+            if (!aspirasiCollectionRef) { // Menggunakan variabel baru
+                alert("Gagal mengekspor, database belum siap.");
+                return;
+            }
+
+            console.log("Memulai export CSV...");
+            exportButton.disabled = true;
+            exportButton.innerHTML = "Mengekspor...";
+
+            try {
+                // Ambil semua data (sekali saja, tidak real-time)
+                const querySnapshot = await getDocs(aspirasiCollectionRef); // Menggunakan variabel baru
+                
+                let csvContent = "data:text/csv;charset=utf-8,";
+                // Header CSV - Menggunakan ; sebagai pemisah
+                csvContent += "Nama;Wilayah;Aspirasi\r\n";
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // Bersihkan data untuk CSV (menghapus koma dan baris baru di dalam data)
+                    const nama = `"${data.nama ? data.nama.replace(/"/g, '""') : ''}"`;
+                    const wilayah = `"${data.wilayah ? data.wilayah.replace(/"/g, '""') : ''}"`;
+                    const aspirasi = `"${data.aspirasi ? data.aspirasi.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ') : ''}"`;
+                    
+                    // Menggunakan ; sebagai pemisah
+                    csvContent += `${nama};${wilayah};${aspirasi}\r\n`;
+                });
+
+                // Buat link download
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "report_aspirasi.csv");
+                document.body.appendChild(link);
+                
+                link.click(); // Trigger download
+                document.body.removeChild(link);
+
+            } catch (error) {
+                console.error("Error saat export CSV:", error);
+                alert("Gagal mengekspor data.");
+            } finally {
+                exportButton.disabled = false;
+                exportButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                    Ekspor CSV
+                `;
+            }
+        });
+
+        // ---- FITUR GEMINI 1: PERBAIKI ASPIRASI ----
+
+        const geminiImproveButton = document.getElementById('geminiImproveButton');
+        const aspirasiTextarea = document.getElementById('aspirasi');
+        const geminiImproveLoading = document.getElementById('geminiImproveLoading');
+
+        geminiImproveButton.addEventListener('click', async () => {
+            const originalText = aspirasiTextarea.value;
+            if (originalText.trim().length < 10) {
+                alert("Masukkan aspirasi Anda terlebih dahulu (minimal 10 karakter).");
+                return;
+            }
+
+            geminiImproveButton.disabled = true;
+            submitButton.disabled = true; // Nonaktifkan juga tombol kirim
+            geminiImproveLoading.classList.remove('hidden');
+
+            const systemPrompt = "Anda adalah seorang editor ahli. Perbaiki tata bahasa, ejaan, dan buat kalimat berikut ini menjadi lebih jelas, formal, dan profesional, namun tetap singkat. Terjemahkan ke Bahasa Indonesia yang baik dan benar jika perlu. Kembalikan HANYA teks yang sudah diperbaiki, tanpa awalan atau penjelasan apa pun.";
+            
+            try {
+                const improvedText = await callGemini(originalText, systemPrompt);
+                aspirasiTextarea.value = improvedText.trim();
+            } catch (error) {
+                console.error("Gagal memperbaiki teks:", error);
+                alert("Gagal menghubungi AI. Coba lagi nanti.");
+            } finally {
+                geminiImproveButton.disabled = false;
+                submitButton.disabled = false;
+                geminiImproveLoading.classList.add('hidden');
+            }
+        });
+
+        // ---- FITUR GEMINI 2: RANGKUMAN ASPIRASI (MODAL) ----
+
+        const geminiSummaryButton = document.getElementById('geminiSummaryButton');
+        const summaryModal = document.getElementById('summaryModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const summaryModalContent = document.getElementById('summaryModalContent');
+
+        geminiSummaryButton.addEventListener('click', async () => {
+            if (!aspirasiCollectionRef) {
+                alert("Database belum siap.");
+                return;
+            }
+            
+            geminiSummaryButton.disabled = true;
+            const originalButtonText = geminiSummaryButton.innerHTML;
+            geminiSummaryButton.innerHTML = "✨ Merangkum...";
+
+            try {
+                const querySnapshot = await getDocs(aspirasiCollectionRef);
+                if (querySnapshot.empty) {
+                    alert("Anda belum memiliki aspirasi untuk dirangkum.");
+                    return;
+                }
+
+                const allAspirasi = querySnapshot.docs.map(doc => doc.data().aspirasi).join('\n---\n');
+                
+                summaryModalContent.innerHTML = '<p class="text-gray-500">✨ AI sedang menganalisis data Anda...</p>';
+                summaryModal.classList.remove('hidden');
+                
+                const systemPrompt = "Anda adalah seorang analis data yang cerdas. Diberikan daftar aspirasi siswa. Identifikasi 3-5 tema utama atau masalah yang paling sering muncul. Berikan rangkuman dalam format poin-poin yang jelas dan singkat.";
+                const userPrompt = `Berikut adalah data aspirasinya:\n${allAspirasi}`;
+
+                const summaryText = await callGemini(userPrompt, systemPrompt);
+                // Ganti newline (\n) dan format poin (seperti * atau -) menjadi HTML
+                let formattedText = escapeHTML(summaryText);
+                formattedText = formattedText.replace(/\n/g, '<br>')
+                                             .replace(/^\* (.*)/gm, '<ul><li>$1</li></ul>')
+                                             .replace(/<\/ul><br><ul>/g, '') // Gabungkan list
+                                             .replace(/^- (.*)/gm, '<ul><li>$1</li></ul>');
+                
+                summaryModalContent.innerHTML = formattedText;
+
+            } catch (error) {
+                console.error("Gagal membuat rangkuman:", error);
+                summaryModalContent.innerHTML = '<p class="text-red-500">Gagal membuat rangkuman. Coba lagi nanti.</p>';
+            } finally {
+                geminiSummaryButton.disabled = false;
+                geminiSummaryButton.innerHTML = originalButtonText;
+            }
+        });
+
+        // Event listener untuk menutup modal
+        closeModalButton.addEventListener('click', () => {
+            summaryModal.classList.add('hidden');
+        });
+
+        // Event listener untuk menutup modal saat klik di luar area modal
+        window.addEventListener('click', (event) => {
+            if (event.target == summaryModal) {
+                summaryModal.classList.add('hidden');
+            }
+        });
+
+
+        // Fungsi helper untuk mencegah XSS (Cross-Site Scripting)
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+        
+        // ---- Jalankan Aplikasi ----
+        initializeAppWithAuth();
+
+    </script>
+</body>
+</html>
